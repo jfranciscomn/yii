@@ -50,7 +50,7 @@ return array(
 			'allowAutoLogin'=>true,
 		),
 		// uncomment the following to enable URLs in path-format
-		
+		/*
 		'urlManager'=>array(
 			'urlFormat'=>'path',
 			'rules'=>array(
@@ -59,7 +59,7 @@ return array(
 				'<controller:\w+>/<action:\w+>'=>'<controller>/<action>',
 			),
 		),
-		
+		*/
 		'db'=>array(
 			'connectionString' => 'sqlite:'.dirname(__FILE__).'/../data/testdrive.db',
 		),
@@ -90,15 +90,9 @@ return array(
 					'class'=>'CWebLogRoute',
 				),
 				*/
-				array(
-			            'class'=>'ext.yii-debug-toolbar.YiiDebugToolbarRoute',
-			            'ipFilters'=>array('127.0.0.1'),
-			        ),
 			),
 		),
 	),
-	
-	'theme'=>'bootstrap',
 
 	// application-level parameters that can be accessed
 	// using Yii::app()->params['paramName']
