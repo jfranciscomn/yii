@@ -28,7 +28,7 @@
 				
 				if($finalCampo=='did'){
 					$modeloColumna=ucwords($partes[0]);
-					echo '<?php echo $form->dropDownList($model,'.$column->name.',CHtml::listData('.$modeloColumna."::model()->findAll(), 'id', 'nombre')); ?>";
+					echo '<?php echo $form->dropDownList($model,'."'".$column->name."'".',CHtml::listData('.$modeloColumna."::model()->findAll(), 'id', 'nombre')); ?>";
 				}
 				else if($finalCampo=='aid'){
 					$modeloColumna=$partes[0];
