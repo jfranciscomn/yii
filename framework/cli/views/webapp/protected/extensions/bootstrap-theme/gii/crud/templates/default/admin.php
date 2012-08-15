@@ -3,16 +3,17 @@
  * The following variables are available in this template:
  * - $this: the CrudCode object
  */
+ $stringkey=Yii::app()->modules['gii']['custom']['StringKey'];
 ?>
 <?php
 echo "<?php\n";
 $label=$this->class2name($this->modelClass);
-echo "\$this->pageCaption='Manage $label';
+echo "\$this->pageCaption='Administrar $label';
 \$this->pageTitle=Yii::app()->name . ' - ' . \$this->pageCaption;
-\$this->pageDescription='Administar ".strtolower($label)."';
+\$this->pageDescription='Administrar ".strtolower($label)."';
 \$this->breadcrumbs=array(
 	'$label'=>array('index'),
-	'Manage',
+	'Administrar',
 );\n";
 ?>
 
@@ -54,6 +55,7 @@ $('.search-form form').submit(function(){
 	'columns'=>array(
 <?php
 $count=0;
+$modelo= new $this->modelClass;
 foreach($this->tableSchema->columns as $column)
 {
 	if(++$count==7)
@@ -63,10 +65,12 @@ foreach($this->tableSchema->columns as $column)
 	$relacion=$partes[0];
 	$modeloColumna=ucwords($partes[0]);
 	
-	if($finalCampo=='did' || $finalCampo=='aid')
+	//print_r($this);
+	
+	if( $modelo->attributeIsDirectRelation($column->name))
 		echo "\t\tarray(	'name'=>'{$column->name}',
-		        'value'=>'\$data->{$relacion}->nombre',
-			    'filter'=>CHtml::listData({$modeloColumna}::model()->findAll(), 'id', 'nombre'),),\n";
+		        'value'=>'\$data->{$relacion}->{$stringkey}',
+			    'filter'=>CHtml::listData({$modelo->attributeDatatypeRelation($column->name)}::model()->findAll(), 'id', '{$stringkey}'),),\n";
 	else
 		echo "\t\t'".$column->name."',\n";
 	/*

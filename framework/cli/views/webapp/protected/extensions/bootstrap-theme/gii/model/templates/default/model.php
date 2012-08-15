@@ -77,12 +77,37 @@ class <?php echo $modelClass; ?> extends <?php echo $this->baseClass."\n"; ?>
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-<?php foreach($rules as $rule): ?>
-			<?php echo $rule.",\n"; ?>
-<?php endforeach; ?>
+		<?php 	foreach($rules as $rule)
+			{
+				if(strstr($rule,'dropdownfield')=='' &&
+					strstr($rule,'autocompletefield')=='' &&
+					strstr($rule,'datefield')=='' )
+					echo $rule.",\n"; 
+			}
+			
+			?>
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
 			array('<?php echo implode(', ', array_keys($columns)); ?>', 'safe', 'on'=>'search'),
+		);
+	}
+	
+	
+	public function extendedRules()
+	{
+		// NOTE: you should only define rules for those attributes that
+		// will receive user inputs.
+		return array(
+		<?php 	foreach($rules as $rule)
+			{
+				if(strstr($rule,'dropdownfield')!='' ||
+					strstr($rule,'autocompletefield')!='' ||
+					strstr($rule,'datefield')!='' )
+					echo $rule.",\n"; 
+			}
+			
+			?>
+			
 		);
 	}
 
@@ -98,6 +123,64 @@ class <?php echo $modelClass; ?> extends <?php echo $this->baseClass."\n"; ?>
 			<?php echo "'$name' => $relation,\n"; ?>
 <?php endforeach; ?>
 		);
+	}
+	
+	
+	/**
+	*
+	*/
+	public function attributeIsDirectRelation($attr)
+	{
+		$relations =$this->relations();
+		foreach($relations as $nombre=>$relacion)
+			if($relacion[2]===$attr && $relacion[0]==self::BELONGS_TO)
+				return true;
+		
+		return false;
+	
+	}
+	
+	/**
+	*
+	**/
+	public function attributeDatatypeRelation($attr)
+	{
+		$relations =$this->relations();
+		foreach($relations as $nombre=>$relacion)
+			if($relacion[2]===$attr)
+				return $relacion[1];
+		
+		return null;
+	}
+	
+	
+	/**
+	* elimina en cascada
+	**/
+	public function deleteCascade()
+	{
+<?php 
+		//if(!empty($relations)
+		foreach($relations as $name=>$relation){
+			if (preg_match("~^array\(self::([^,]+), '([^']+)', '([^']+)'\)$~", $relation, $matches))
+			{
+				
+				
+				$relationType = $matches[1];
+				$relationModel = $matches[2];
+				$rname=$name.'n';
+				switch($relationType){
+					case 'HAS_MANY':
+						echo "\t\tforeach (\$this->\$$name as \$$rname )\n\t\t\t\$$rname"."->deleteCascade();\n\n";
+					break;
+					case 'HAS_ONE':
+						echo "\t\t\$$rname"."->deleteCascade();\n\n";
+					break;
+				}
+			}
+		} 
+		echo "\t\t\$this->delete();\n";
+		?>
 	}
 
 	/**

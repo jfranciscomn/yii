@@ -8,6 +8,8 @@ class CrudCode extends CCodeModel
 
 	private $_modelClass;
 	private $_table;
+	private $_fieldTypes;
+	
 
 	public function rules()
 	{
@@ -43,7 +45,13 @@ class CrudCode extends CCodeModel
 	{
 		if(Yii::app()->db===null)
 			throw new CHttpException(500,'An active "db" connection is required to run this generator.');
+		
 		parent::init();
+		
+		
+		
+
+		
 	}
 
 	public function successMessage()
@@ -73,9 +81,25 @@ class CrudCode extends CCodeModel
 				$this->_modelClass=$class;
 				$this->_table=$table;
 			}
+			$this->generateFieldTypes();
 		}
 	}
-
+	
+	private function generateFieldTypes()
+	{
+		$modelo= new $this->_modelClass;
+		$this->_fieldTypes=array();
+		foreach($modelo->extendedRules() as $regla){
+			if($regla[1]=='dropdownfield')
+				$this->_fieldTypes['dropdownfield']=explode(', ',$regla[0]);
+			else if($regla[1]=='autocompletefield')
+				$this->_fieldTypes['autocompletefield']=explode(', ',$regla[0]);
+			else if($regla[1]=='datefield')
+				$this->_fieldTypes['datefield']=explode(', ',$regla[0]);
+			}
+	}
+	
+		
 	public function prepare()
 	{
 		$this->files=array();
@@ -98,6 +122,7 @@ class CrudCode extends CCodeModel
 				);
 			}
 		}
+		
 	}
 
 	public function getModelClass()
@@ -175,6 +200,7 @@ class CrudCode extends CCodeModel
 
 	public function generateInputField($modelClass,$column)
 	{
+		
 		if($column->type==='boolean')
 			return "BHtml::activeCheckBox(\$model,'{$column->name}')";
 		else if(stripos($column->dbType,'text')!==false)
@@ -204,6 +230,7 @@ class CrudCode extends CCodeModel
 
 	public function generateActiveField($modelClass,$column)
 	{
+		$stringkey=Yii::app()->modules['gii']['custom']['StringKey'];
 		if($column->type==='boolean')
 			return "\$form->checkBox(\$model,'{$column->name}')";
 		else if(stripos($column->dbType,'text')!==false)
@@ -215,7 +242,47 @@ class CrudCode extends CCodeModel
 			else
 				$inputField='textField';
 
-			if($column->type!=='string' || $column->size===null)
+			$modelo= new $this->_modelClass;
+			if(!empty($this->_fieldTypes['dropdownfield'])  && in_array($column->name,$this->_fieldTypes['dropdownfield']))
+				return '$form->dropDownList($model,\''.$column->name.'\',CHtml::listData('.$modelo->attributeDatatypeRelation($column->name)."::model()->findAll(), 'id', '{$stringkey}'))";
+			else if(!empty($this->_fieldTypes['autocompletefield'])  &&  in_array($column->name, $this->_fieldTypes['autocompletefield']))
+				return "\$this->widget('ext.custom.widgets.EJuiAutoCompleteFkField', array(
+						'model'=>\$model, 
+						'attribute'=>'$column->name', 
+						'sourceUrl'=>Yii::app()->createUrl('".$modelo->attributeDatatypeRelation($column->name)."/autocompletesearch'), 
+						'showFKField'=>false,
+						'relName'=>'".$modelo->attributeDatatypeRelation($column->name)."', // the relation name defined above
+						'displayAttr'=>'{$stringkey}',  // attribute or pseudo-attribute to display
+						
+						'options'=>array(
+							'minLength'=>1, 
+						),
+					))";
+			else if(!empty($this->_fieldTypes['datefield'])  &&  in_array($column->name, $this->_fieldTypes['datefield']))
+				return "\$this->widget('zii.widgets.jui.CJuiDatePicker', array(
+					                                       'model'=>\$model,
+					                                       'attribute'=>'$column->name',
+					                                       'value'=>\$model->$column->name,
+					                                       'language' => 'es',
+					                                       'htmlOptions' => array('readonly'=>\"readonly\"),
+					                                       'options'=>array(
+					                                               'autoSize'=>true,
+					                                               'defaultDate'=>\$model->$column->name,
+					                                               'dateFormat'=>'yy-mm-dd',
+					                                               'buttonImage'=>Yii::app()->baseUrl.'/images/calendar.png',
+					                                               'buttonImageOnly'=>true,
+					                                               'buttonText'=>'Fecha',
+					                                               'selectOtherMonths'=>true,
+					                                               'showAnim'=>'slide',
+					                                               'showButtonPanel'=>true,
+					                                               'showOn'=>'button',
+					                                               'showOtherMonths'=>true,
+					                                               'changeMonth' => 'true',
+					                                               'changeYear' => 'true',
+					                                               'minDate'=>\"-70Y\", //fecha minima
+					                                               'maxDate'=> \"+10Y\", //fecha maxima
+					                                       ),))";
+			else if($column->type!=='string' || $column->size===null)
 				return "\$form->{$inputField}(\$model,'{$column->name}')";
 			else
 			{

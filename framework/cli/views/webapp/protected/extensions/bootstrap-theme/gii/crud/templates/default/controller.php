@@ -4,6 +4,7 @@
  * The following variables are available in this template:
  * - $this: the CrudCode object
  */
+ 	$stringkey=Yii::app()->modules['gii']['custom']['StringKey'];
 ?>
 <?php echo "<?php\n"; ?>
 
@@ -120,7 +121,7 @@ class <?php echo $this->controllerClass; ?> extends <?php echo $this->baseContro
 		if(Yii::app()->request->isPostRequest)
 		{
 			// we only allow deletion via POST request
-			$this->loadModel($id)->delete();
+			$this->loadModel($id)->deleteCascade();
 
 			// if AJAX request (triggered by deletion via admin grid view), we should not redirect the browser
 			if(!isset($_GET['ajax']))
@@ -190,14 +191,14 @@ class <?php echo $this->controllerClass; ?> extends <?php echo $this->baseContro
 	    if (!empty($q))
 	    {
 			$criteria=new CDbCriteria;
-			$criteria->select=array('id', "CONCAT_WS(' ',nombre) as nombre");
-			$criteria->condition="lower(CONCAT_WS(' ',nombre)) like lower(:nombre) ";
+			$criteria->select=array('id', "CONCAT_WS(' ',<?php echo $stringkey; ?>) as <?php echo $stringkey; ?>");
+			$criteria->condition="lower(CONCAT_WS(' ',<?php echo $stringkey; ?>)) like lower(:nombre) ";
 			$criteria->params=array(':nombre'=>$q);
 			$criteria->limit='10';
 	       	$cursor = <?php echo $this->modelClass; ?>::model()->findAll($criteria);
 			foreach ($cursor as $valor)	
-				$result[]=Array('label' => $valor->nombre,  
-				                'value' => $valor->nombre,
+				$result[]=Array('label' => $valor-><?php echo $stringkey; ?>,  
+				                'value' => $valor-><?php echo $stringkey; ?>,
 				                'id' => $valor->id, );
 	    }
 	    echo json_encode($result);

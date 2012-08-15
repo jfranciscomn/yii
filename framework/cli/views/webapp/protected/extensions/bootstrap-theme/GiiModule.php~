@@ -1,0 +1,6 @@
+<?php 
+
+Yii::import('system.gii.GiiModule');
+
+class CustomGiiModule extends CWebModule 
+?>

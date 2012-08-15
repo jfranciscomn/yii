@@ -3,6 +3,7 @@
  * The following variables are available in this template:
  * - $this: the CrudCode object
  */
+ $stringkey=$this->module->modules['gii']['custom']['StringKey'];
 ?>
 <?php
 echo "<?php\n";
@@ -40,9 +41,9 @@ foreach($this->tableSchema->columns as $column)
 	$finalCampo=$partes[count($partes)-1];
 	$relacion=$partes[0];
 
-	if($finalCampo=='did' || $finalCampo=='aid')	
+	if(($finalCampo=='did' || $finalCampo=='aid' || $finalCampo=='id' ) && $column->name!="id")
 		echo "\t\tarray(	'name'=>'{$column->name}',
-		        'value'=>\$model->{$relacion}->nombre,),\n";
+		        'value'=>\$model->{$relacion}->{$stringkey},),\n";
 	else
 		echo "\t\t'".$column->name."',\n";
 }

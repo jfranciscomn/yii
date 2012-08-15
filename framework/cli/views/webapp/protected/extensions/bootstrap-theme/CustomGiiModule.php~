@@ -1,0 +1,10 @@
+<?php 
+
+Yii::import('system.gii.GiiModule');
+
+class CustomGiiModule extends GiiModule {
+	public $Custom= array(
+		'StringKey'=>'name',
+	);
+}
+?>
