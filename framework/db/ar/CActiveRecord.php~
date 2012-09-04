@@ -186,14 +186,7 @@ abstract class CActiveRecord extends CModel
 		else if(isset($this->getMetaData()->relations[$name]))
 			return $this->getRelated($name)!==null;
 		else
-		{
-			$lie=$this->linkedRelations();
-			$ret=$this->getLinkedAttributes($name,$lie);
-			if(isset($ret))
-				return true;
-			else
-				return parent::__isset($name);
-		}
+			return parent::__isset($name);
 	}
 
 	/**
