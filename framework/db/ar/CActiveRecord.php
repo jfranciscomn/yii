@@ -1900,7 +1900,14 @@ abstract class CActiveRecord extends CModel
 		
 		return false;
 	}
-	
+	public function attributeReferenceRelation($attr)
+	{
+		$relations =$this->relations();
+		foreach($relations as $nombre=>$relacion)
+			if($relacion[2]===$attr)
+				return $nombre;
+		return null;
+	}
 	public function attributeDatatypeRelation($attr)
 	{
 		$relations =$this->relations();
