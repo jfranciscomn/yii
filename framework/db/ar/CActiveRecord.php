@@ -163,7 +163,7 @@ abstract class CActiveRecord extends CModel
 		{
 			if(isset($this->getMetaData()->relations[$name]))
 				$this->_related[$name]=$value;
-			if(!$this->setLinkedAttributes($attr,$value,$this->linkedRelations()))
+			if(!$this->setLinkedAttributes($name,$value,$linkedRel=$this->linkedRelations()))
 				parent::__set($name,$value);
 		}
 	}
@@ -1941,16 +1941,17 @@ abstract class CActiveRecord extends CModel
 
 	public function setLinkedAttributes($attr,$value, $linkedRel=array())
 	{
+
 		foreach($linkedRel as $key=>$values)
 		{
-			if(is_array($values) && isset($values['attribute']) && $values['attribute']==$attr)
+			if(is_array($values) && isset($values['attribute']) && $values['attribute']===$attr)
 			{
 				$values['value']=$value;
 				return true;
 			}
 			else if(is_array($values) && isset($values['linked']))
 			{
-				$ra = $this->setLinkedAttributes($attr,array($value['attribute']=>$values['linked']));
+				$ra = $this->setLinkedAttributes($attr,$value,array($values['attribute']=>$values['linked']));
 				if($ra)
 					return $ra;
 			}
